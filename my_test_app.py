@@ -1,14 +1,18 @@
-import json
-import requests
 from flask import Flask
+from flask import request
+
+from dark_sky import DarkSkyWeather
+
 app = Flask(__name__)
+dark_sky_api_key = '2a4d7d84f67ec474128de81e7ca6f974'
 
-@app.route('/weather/odessa/')
+@app.route('/weather/current')
 def hello_world():
-    DarkSkyWeather.current(city=Odessa)
-    url = 'https://api.darksky.net/forecast/070cb4f3ace25c5cdfedf89527ba83f6/46.4736019,30.603976'
-    params = {'exclude':'currently,minutely,hourly'}
-    response = requests.get(url, params=params)
-    response_content = json.loads(response.content)
-    return json.dumps(response_content)
+    DarkSkyWeather.set_api_key(dark_sky_api_key)
+    city = request.args.get('city')
 
+    if not city:
+        return "Please specify City"
+
+    response = DarkSkyWeather.current(city=city)
+    return str(response)
