@@ -5,14 +5,40 @@ from dark_sky import DarkSkyWeather
 
 app = Flask(__name__)
 dark_sky_api_key = '2a4d7d84f67ec474128de81e7ca6f974'
+DarkSkyWeather.set_api_key(dark_sky_api_key)
 
-@app.route('/weather/current')
-def hello_world():
-    DarkSkyWeather.set_api_key(dark_sky_api_key)
+
+@app.route('/weather/currently')
+def get_currently_forecast():
     city = request.args.get('city')
 
-    if not city:
-        return "Please specify City"
+    response = DarkSkyWeather.currently(city=city)
+    # response processing
+    return str(response)
 
-    response = DarkSkyWeather.current(city=city)
+
+@app.route('/weather/daily')
+def get_daily_forecast():
+    city = request.args.get('city')
+
+    response = DarkSkyWeather.daily(city=city)
+    # response processing
+    return str(response)
+
+
+@app.route('/weather/hourly')
+def get_hourly_forecast():
+    city = request.args.get('city')
+
+    response = DarkSkyWeather.hourly(city=city)
+    # response processing
+    return str(response)
+
+
+@app.route('/weather')
+def get_forecast():
+    city = request.args.get('city')
+
+    response = DarkSkyWeather.all(city=city)
+    # response processing
     return str(response)
