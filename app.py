@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 
 from config import DevelopmentConfig
-from models import Users
+
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
@@ -22,3 +22,26 @@ def create_user_view():
     # todo create user with email form post body
     pass
 
+@app.route('/users/create/', methods=['POST'])
+def create_user_view():
+    # todo create user with email form post body
+    new_user_email = request.form['user_email']
+    user_exists = Users.query.filter_by(user_email=new_user_email).first()
+
+    if not user_exists:
+        new_user_model = Users(new_user_email)
+        db.session.add(new_user_model)
+        created_user = Users.query.filter_by(user_email=new_user_email).first()
+        return "New User crested: {} : {}"\
+            .format(created_user.id, created_user.user_email)
+    return "User already exists {} : {}".format(user_exists.id, user_exists.user_email)
+
+
+class Users(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_email = db.Column(db.String())
+
+    def __repr__(self):
+        return '<id {}>'.format(self.id)
