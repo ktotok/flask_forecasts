@@ -1,13 +1,24 @@
-from flask import Flask, request
+from flask import Flask
+from flask import request
+from flask_login import logout_user
+from flask_login import LoginManager
+from flask_login import login_required
+from flask_login import login_user
 from flask_sqlalchemy import SQLAlchemy
+
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
+app.secret_key = 'xxxxyyyyyzzzzz'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 if not db:
     raise SystemExit('DB not loaded')
 from config import DevelopmentConfig
-
+from models import Users
 
 app.config.from_object(DevelopmentConfig)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -36,12 +47,29 @@ def create_user_view():
         return "User already exists {} : {}".format(user_exists.id, user_exists.user_email)
 
 
-class Users(db.Model):
-    __tablename__ = 'users'
+@app.route('/login')
+def login():
+    email = request.args.get('user_email')
+    user = Users.query.filter_by(user_email=email).first()
+    if not user:
+        return "no such user"
+    login_user(user)
+    return "User logged in"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_email = db.Column(db.String())
 
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
+@app.route("/user_profile")
+@login_required
+def settings():
+    return "User profile page"
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.filter_by(id=user_id).first()
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return "user logout"
