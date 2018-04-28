@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 
-from app import db
+from forecast_app import db
 
 
 class Users(db.Model, UserMixin):
